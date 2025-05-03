@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, Outlet } from 'react-router-dom';
+import {useEffect, ReactNode } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 // import { supabase } from './lib/supabase';
-import apiClient from './lib/api';
+// import apiClient from './lib/api';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -10,11 +10,24 @@ import ProjectList from './pages/projects/ProjectList';
 import InvoiceList from './pages/invoices/InvoiceList';
 import InvoiceView from './pages/invoices/InvoiceView';
 import ExpenseList from './pages/expenses/ExpenseList';
+import TimeTracking from './pages/time-tracking/TimeTracking';
+import TimeTrackingAnalytics from './pages/time-tracking/TimeTrackingAnalytics';
 import Analytics from './pages/analytics/Analytics';
+import TaxDashboard from './pages/tax/TaxDashboard';
+import TaxSettings from './pages/tax/TaxSettings';
+import QuarterlyTaxCalculator from './pages/tax/QuarterlyTaxCalculator';
 import { startRecurringInvoiceCheck } from './services/recurringInvoices';
+import {
+  ClockIcon,
+  ChartBarIcon,
+  CalculatorIcon,
+  DocumentTextIcon,
+  ArrowRightOnRectangleIcon,
+} from '@heroicons/react/24/outline';
+import { supabase } from './lib/supabase';
 
 // Protected Route wrapper component
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   
   if (loading) {
@@ -28,117 +41,223 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Layout component that includes Navigation and Outlet for child routes
-function Layout() {
-  const { signOut } = useAuth();
-  
+function Sidebar() {
+  const location = useLocation();
+  const { user } = useAuth();
+  const isActive = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <nav className="w-64 bg-white shadow-lg p-6">
-        <h1 className="text-xl font-bold text-indigo-600 mb-8">Freelancer Tracker</h1>
-        <ul className="space-y-2">
-          <li>
-            <NavLink to="/">Dashboard</NavLink>
-          </li>
-          <li>
-            <NavLink to="/clients">Clients</NavLink>
-          </li>
-          <li>
-            <NavLink to="/projects">Projects</NavLink>
-          </li>
-          <li>
-            <NavLink to="/invoices">Invoices</NavLink>
-          </li>
-          <li>
-            <NavLink to="/income">Income</NavLink>
-          </li>
-          <li>
-            <NavLink to="/expenses">Expenses</NavLink>
-          </li>
-          <li>
-            <NavLink to="/analytics">Analytics</NavLink>
-          </li>
-          <li>
-            <button
-              onClick={() => signOut()}
-              className="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              Sign Out
-            </button>
-          </li>
-        </ul>
-      </nav>
-      <main className="flex-1">
-        <Outlet />
-      </main>
+    <nav className="bg-gray-800 text-white w-64 min-h-screen p-4 flex flex-col">
+      <div className="text-xl font-bold mb-8">Freelance Manager</div>
+      <ul className="space-y-2 flex-grow">
+        <li>
+          <Link
+            to="/clients"
+            className={`block px-4 py-2 rounded ${
+              isActive('/clients') ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Clients
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/projects"
+            className={`block px-4 py-2 rounded ${
+              isActive('/projects') ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Projects
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/invoices"
+            className={`block px-4 py-2 rounded ${
+              isActive('/invoices') ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Invoices
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/expenses"
+            className={`block px-4 py-2 rounded ${
+              isActive('/expenses') ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Expenses
+          </Link>
+        </li>
+        <li>
+          <div className="px-4 py-2 text-gray-400 text-sm uppercase">Time Tracking</div>
+          <ul className="ml-4 space-y-2">
+            <li>
+              <Link
+                to="/time-tracking"
+                className={`flex items-center px-4 py-2 rounded ${
+                  isActive('/time-tracking') ? 'bg-gray-700' : 'hover:bg-gray-700'
+                }`}
+              >
+                <ClockIcon className="h-5 w-5 mr-2" />
+                Timer
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/time-tracking/analytics"
+                className={`flex items-center px-4 py-2 rounded ${
+                  isActive('/time-tracking/analytics') ? 'bg-gray-700' : 'hover:bg-gray-700'
+                }`}
+              >
+                <ChartBarIcon className="h-5 w-5 mr-2" />
+                Analytics
+              </Link>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <Link
+            to="/analytics"
+            className={`block px-4 py-2 rounded ${
+              isActive('/analytics') ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Business Analytics
+          </Link>
+        </li>
+        <li>
+          <div className="px-4 py-2 text-gray-400 text-sm uppercase">Tax Management</div>
+          <ul className="ml-4 space-y-2">
+            <li>
+              <Link
+                to="/tax"
+                className={`flex items-center px-4 py-2 rounded ${
+                  isActive('/tax') ? 'bg-gray-700' : 'hover:bg-gray-700'
+                }`}
+              >
+                <DocumentTextIcon className="h-5 w-5 mr-2" />
+                Tax Dashboard
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/tax/quarterly"
+                className={`flex items-center px-4 py-2 rounded ${
+                  isActive('/tax/quarterly') ? 'bg-gray-700' : 'hover:bg-gray-700'
+                }`}
+              >
+                <CalculatorIcon className="h-5 w-5 mr-2" />
+                Quarterly Taxes
+              </Link>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      
+      {/* User section with sign out button */}
+      <div className="border-t border-gray-700 pt-4 mt-4">
+        <div className="px-4 py-2 text-sm text-gray-400">
+          {user?.email}
+        </div>
+        <button
+          onClick={handleSignOut}
+          className="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 rounded transition-colors"
+        >
+          <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2" />
+          Sign Out
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+interface LayoutProps {
+  children: ReactNode;
+}
+
+function Layout({ children }: LayoutProps) {
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      <Sidebar />
+      <main className="flex-1">{children}</main>
     </div>
   );
 }
 
 // Simple placeholder components
-const Dashboard = () => {
-  const [testMessage, setTestMessage] = useState<string>('');
+// const Dashboard = () => {
+//   const [testMessage, setTestMessage] = useState<string>('');
   
-  useEffect(() => {
-    apiClient.get('/test')
-      .then(response => {
-        setTestMessage(response.data.message);
-      })
-      .catch(error => {
-        console.error('API Error:', error);
-        setTestMessage('Failed to connect to API');
-      });
-  }, []);
+//   useEffect(() => {
+//     apiClient.get('/test')
+//       .then(response => {
+//         setTestMessage(response.data.message);
+//       })
+//       .catch(error => {
+//         console.error('API Error:', error);
+//         setTestMessage('Failed to connect to API');
+//       });
+//   }, []);
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
-      <p className="text-sm text-gray-600 mb-8">API Status: {testMessage || 'Loading...'}</p>
-      <div>
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">Quick Stats</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <h3 className="text-gray-600 text-sm font-medium mb-2">Total Income</h3>
-            <p className="text-2xl font-bold text-green-600">$0.00</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <h3 className="text-gray-600 text-sm font-medium mb-2">Total Expenses</h3>
-            <p className="text-2xl font-bold text-red-600">$0.00</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <h3 className="text-gray-600 text-sm font-medium mb-2">Net Profit</h3>
-            <p className="text-2xl font-bold text-blue-600">$0.00</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div className="p-6">
+//       <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
+//       <p className="text-sm text-gray-600 mb-8">API Status: {testMessage || 'Loading...'}</p>
+//       <div>
+//         <h2 className="text-xl font-semibold text-gray-700 mb-4">Quick Stats</h2>
+//         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+//             <h3 className="text-gray-600 text-sm font-medium mb-2">Total Income</h3>
+//             <p className="text-2xl font-bold text-green-600">$0.00</p>
+//           </div>
+//           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+//             <h3 className="text-gray-600 text-sm font-medium mb-2">Total Expenses</h3>
+//             <p className="text-2xl font-bold text-red-600">$0.00</p>
+//           </div>
+//           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+//             <h3 className="text-gray-600 text-sm font-medium mb-2">Net Profit</h3>
+//             <p className="text-2xl font-bold text-blue-600">$0.00</p>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
-const Income = () => (
-  <div className="p-6">
-    <h1 className="text-2xl font-bold text-gray-800 mb-6">Income</h1>
-    <p className="text-gray-600">Your income will appear here.</p>
-  </div>
-);
+// const Income = () => (
+//   <div className="p-6">
+//     <h1 className="text-2xl font-bold text-gray-800 mb-6">Income</h1>
+//     <p className="text-gray-600">Your income will appear here.</p>
+//   </div>
+// );
 
-const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
-  const location = useLocation();
-  const isActive = location.pathname === to;
+// const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
+//   const location = useLocation();
+//   const isActive = location.pathname === to;
   
-  return (
-    <Link
-      to={to}
-      className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-        isActive
-          ? 'bg-indigo-100 text-indigo-700'
-          : 'text-gray-600 hover:bg-gray-100'
-      }`}
-    >
-      {children}
-    </Link>
-  );
-};
+//   return (
+//     <Link
+//       to={to}
+//       className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+//         isActive
+//           ? 'bg-indigo-100 text-indigo-700'
+//           : 'text-gray-600 hover:bg-gray-100'
+//       }`}
+//     >
+//       {children}
+//     </Link>
+//   );
+// };
 
 const App = () => {
   useEffect(() => {
@@ -155,19 +274,122 @@ const App = () => {
             path="/"
             element={
               <ProtectedRoute>
-                <Layout />
+                <Layout>
+                  <Navigate to="/time-tracking" />
+                </Layout>
               </ProtectedRoute>
             }
-          >
-            <Route index element={<Dashboard />} />
-            <Route path="clients" element={<ClientList />} />
-            <Route path="projects" element={<ProjectList />} />
-            <Route path="invoices" element={<InvoiceList />} />
-            <Route path="invoices/:id/view" element={<InvoiceView />} />
-            <Route path="income" element={<Income />} />
-            <Route path="expenses" element={<ExpenseList />} />
-            <Route path="analytics" element={<Analytics />} />
-          </Route>
+          />
+          <Route
+            path="/clients"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ClientList />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProjectList />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoices"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <InvoiceList />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/invoices/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <InvoiceView />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/expenses"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ExpenseList />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/time-tracking"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TimeTracking />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/time-tracking/analytics"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TimeTrackingAnalytics />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Analytics />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tax"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TaxDashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tax/settings"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <TaxSettings />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tax/quarterly"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <QuarterlyTaxCalculator />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </AuthProvider>
