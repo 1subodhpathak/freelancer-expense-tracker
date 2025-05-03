@@ -10,6 +10,7 @@ import ProjectList from './pages/projects/ProjectList';
 import InvoiceList from './pages/invoices/InvoiceList';
 import InvoiceView from './pages/invoices/InvoiceView';
 import ExpenseList from './pages/expenses/ExpenseList';
+import Analytics from './pages/analytics/Analytics';
 import { startRecurringInvoiceCheck } from './services/recurringInvoices';
 
 // Protected Route wrapper component
@@ -53,6 +54,9 @@ function Layout() {
           </li>
           <li>
             <NavLink to="/expenses">Expenses</NavLink>
+          </li>
+          <li>
+            <NavLink to="/analytics">Analytics</NavLink>
           </li>
           <li>
             <button
@@ -162,6 +166,7 @@ const App = () => {
             <Route path="invoices/:id/view" element={<InvoiceView />} />
             <Route path="income" element={<Income />} />
             <Route path="expenses" element={<ExpenseList />} />
+            <Route path="analytics" element={<Analytics />} />
           </Route>
         </Routes>
       </Router>
