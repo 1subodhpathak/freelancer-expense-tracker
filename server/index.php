@@ -1,6 +1,19 @@
 <?php
+// Load environment variables
+$envFile = __DIR__ . '/.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $_ENV[trim($key)] = trim($value);
+        }
+    }
+}
+
 // Enable CORS for development
-header("Access-Control-Allow-Origin: *");  // For development only - make more restrictive in production
+$allowedOrigin = $_ENV['CORS_ORIGIN'] ?? '*';
+header("Access-Control-Allow-Origin: $allowedOrigin");  // For development only - make more restrictive in production
 header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header('Content-Type: application/json');
