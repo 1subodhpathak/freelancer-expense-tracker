@@ -210,6 +210,14 @@ export default function TimeTracking() {
     return `${hours}h ${mins}m`;
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-gray-600">Loading time entries...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -465,4 +473,4 @@ export default function TimeTracking() {
       )}
     </div>
   );
-} 
+}

@@ -4,6 +4,24 @@ import { supabase } from '../../lib/supabase';
 import { Vendor } from '../../types';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
+interface VendorFormData {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  website: string;
+  notes: string;
+}
+
+const initialFormData: VendorFormData = {
+  name: '',
+  email: '',
+  phone: '',
+  address: '',
+  website: '',
+  notes: '',
+};
+
 export default function VendorList() {
   const { user } = useAuth();
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -11,14 +29,7 @@ export default function VendorList() {
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    website: '',
-    notes: '',
-  });
+  const [formData, setFormData] = useState<VendorFormData>(initialFormData);
 
   useEffect(() => {
     fetchVendors();
@@ -60,14 +71,7 @@ export default function VendorList() {
       
       setIsModalOpen(false);
       setEditingVendor(null);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        website: '',
-        notes: '',
-      });
+      setFormData(initialFormData);
       fetchVendors();
     } catch (err) {
       console.error('Error saving vendor:', err);
@@ -112,14 +116,7 @@ export default function VendorList() {
         <button
           onClick={() => {
             setEditingVendor(null);
-            setFormData({
-              name: '',
-              email: '',
-              phone: '',
-              address: '',
-              website: '',
-              notes: '',
-            });
+            setFormData(initialFormData);
             setIsModalOpen(true);
           }}
           className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Expense, ExpenseCategory, Vendor } from '../../types';
+import { Expense, ExpenseCategory, Vendor, RecurringInterval } from '../../types';
 import { PlusIcon, PencilIcon, TrashIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -20,6 +20,20 @@ const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: 'other', label: 'Other' }
 ];
 
+interface ExpenseFormData {
+  vendor_id?: string;
+  category: ExpenseCategory;
+  amount: number;
+  date: string;
+  description: string;
+  is_recurring: boolean;
+  recurring_interval?: RecurringInterval;
+  next_expense_date?: string;
+  is_tax_deductible: boolean;
+  tax_category?: string;
+  notes?: string;
+}
+
 export default function ExpenseList() {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -28,14 +42,13 @@ export default function ExpenseList() {
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-  const [formData, setFormData] = useState<Partial<Expense>>({
+  const [formData, setFormData] = useState<ExpenseFormData>({
     category: 'other',
     amount: 0,
     date: format(new Date(), 'yyyy-MM-dd'),
     description: '',
     is_recurring: false,
     is_tax_deductible: false,
-    notes: '',
   });
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
@@ -140,7 +153,6 @@ export default function ExpenseList() {
         description: '',
         is_recurring: false,
         is_tax_deductible: false,
-        notes: '',
       });
       setReceiptFile(null);
       fetchExpenses();
@@ -199,7 +211,6 @@ export default function ExpenseList() {
               description: '',
               is_recurring: false,
               is_tax_deductible: false,
-              notes: '',
             });
             setIsModalOpen(true);
           }}
@@ -422,7 +433,7 @@ export default function ExpenseList() {
                       <label className="block text-sm font-medium text-gray-700">Interval</label>
                       <select
                         value={formData.recurring_interval || 'monthly'}
-                        onChange={(e) => setFormData({ ...formData, recurring_interval: e.target.value as 'weekly' | 'monthly' | 'quarterly' | 'yearly' })}
+                        onChange={(e) => setFormData({ ...formData, recurring_interval: e.target.value as RecurringInterval })}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       >
                         <option value="weekly">Weekly</option>
