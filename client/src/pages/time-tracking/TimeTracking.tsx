@@ -31,6 +31,14 @@ interface TimeTrackingSettings {
   working_days_per_week: number;
 }
 
+export const Container = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      {children}
+    </div>
+  );
+};
+
 export default function TimeTracking() {
   const { user } = useAuth();
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
@@ -219,23 +227,24 @@ export default function TimeTracking() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Time Tracking</h1>
-        <div className="space-x-4">
+    <Container>
+      {/* Header section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h1 className="text-xl sm:text-2xl font-bold">Time Tracking</h1>
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setIsSettingsModalOpen(true)}
-            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            className="p-2 text-gray-600 hover:text-gray-800"
           >
-            <CogIcon className="h-6 w-6" />
+            <CogIcon className="h-5 w-5" />
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center"
+            className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 flex items-center"
             disabled={!!activeTimer}
           >
             <PlusIcon className="h-5 w-5 mr-2" />
-            New Time Entry
+            <span>New Entry</span>
           </button>
         </div>
       </div>
@@ -266,65 +275,68 @@ export default function TimeTracking() {
         </div>
       )}
 
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Task
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Project
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Duration
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {timeEntries.map((entry) => (
-              <tr key={entry.id}>
-                <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    {entry.task_description}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {format(parseISO(entry.start_time), 'MMM d, yyyy h:mm a')}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {entry.project?.name}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {formatDuration(entry.duration_minutes)}
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                    ${entry.status === 'ongoing' ? 'bg-yellow-100 text-yellow-800' : ''}
-                    ${entry.status === 'completed' ? 'bg-green-100 text-green-800' : ''}
-                    ${entry.status === 'invoiced' ? 'bg-gray-100 text-gray-800' : ''}
-                  `}>
-                    {entry.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm font-medium">
-                  <button
-                    onClick={() => deleteTimeEntry(entry.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
-                </td>
+      {/* Table responsive wrapper */}
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Task
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Project
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Duration
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {timeEntries.map((entry) => (
+                <tr key={entry.id}>
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-gray-900">
+                      {entry.task_description}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {format(parseISO(entry.start_time), 'MMM d, yyyy h:mm a')}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {entry.project?.name}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {formatDuration(entry.duration_minutes)}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                      ${entry.status === 'ongoing' ? 'bg-yellow-100 text-yellow-800' : ''}
+                      ${entry.status === 'completed' ? 'bg-green-100 text-green-800' : ''}
+                      ${entry.status === 'invoiced' ? 'bg-gray-100 text-gray-800' : ''}
+                    `}>
+                      {entry.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm font-medium">
+                    <button
+                      onClick={() => deleteTimeEntry(entry.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* New Time Entry Modal */}
@@ -471,6 +483,6 @@ export default function TimeTracking() {
           </div>
         </div>
       )}
-    </div>
+    </Container>
   );
 }

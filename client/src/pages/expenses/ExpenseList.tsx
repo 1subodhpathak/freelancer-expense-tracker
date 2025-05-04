@@ -3,7 +3,8 @@ import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Expense, ExpenseCategory, Vendor, RecurringInterval } from '../../types';
 import { PlusIcon, PencilIcon, TrashIcon, DocumentIcon } from '@heroicons/react/24/outline';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+// import Container from '../Container';
 
 const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
   { value: 'office_supplies', label: 'Office Supplies' },
@@ -34,6 +35,14 @@ interface ExpenseFormData {
   notes?: string;
 }
 
+export const Container = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      {children}
+    </div>
+  );
+};
+
 export default function ExpenseList() {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -51,6 +60,7 @@ export default function ExpenseList() {
     is_tax_deductible: false,
   });
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [filterCategory, setFilterCategory] = useState('all');
 
   useEffect(() => {
     fetchExpenses();
@@ -198,27 +208,42 @@ export default function ExpenseList() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Expenses</h1>
-        <button
-          onClick={() => {
-            setEditingExpense(null);
-            setFormData({
-              category: 'other',
-              amount: 0,
-              date: format(new Date(), 'yyyy-MM-dd'),
-              description: '',
-              is_recurring: false,
-              is_tax_deductible: false,
-            });
-            setIsModalOpen(true);
-          }}
-          className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-        >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          Add Expense
-        </button>
+    <Container>
+      {/* Header with responsive filters */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold">Expenses</h1>
+        <div className="flex flex-wrap gap-2">
+          <select
+            className="rounded border-gray-300"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="all">All Categories</option>
+            {EXPENSE_CATEGORIES.map((category) => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              setEditingExpense(null);
+              setFormData({
+                category: 'other',
+                amount: 0,
+                date: format(new Date(), 'yyyy-MM-dd'),
+                description: '',
+                is_recurring: false,
+                is_tax_deductible: false,
+              });
+              setIsModalOpen(true);
+            }}
+            className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Add Expense
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -230,96 +255,121 @@ export default function ExpenseList() {
       {loading ? (
         <div>Loading...</div>
       ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Vendor
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Receipt
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {expenses.map((expense) => (
-                <tr key={expense.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {format(new Date(expense.date), 'MMM d, yyyy')}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{expense.description}</div>
-                    {expense.is_recurring && (
-                      <div className="text-xs text-gray-500">
-                        Recurring ({expense.recurring_interval})
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100">
+        <>
+          {/* Mobile card view for small screens */}
+          <div className="block sm:hidden space-y-4">
+            {expenses.map((expense) => (
+              <div key={expense.id} className="bg-white p-4 rounded-lg shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-medium">{expense.description}</div>
+                    <div className="text-sm text-gray-500">
                       {EXPENSE_CATEGORIES.find(cat => cat.value === expense.category)?.label}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {expense.vendor?.name || '-'}
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      ${expense.amount.toFixed(2)}
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium">${expense.amount.toFixed(2)}</div>
+                    <div className="text-sm text-gray-500">
+                      {format(parseISO(expense.date), 'MMM d, yyyy')}
                     </div>
-                    {expense.is_tax_deductible && (
-                      <div className="text-xs text-green-600">Tax Deductible</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    {expense.receipt_url && (
-                      <a
-                        href={expense.receipt_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table view */}
+          <div className="hidden sm:block overflow-x-auto bg-white shadow rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Vendor
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Receipt
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {expenses.map((expense) => (
+                  <tr key={expense.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {format(new Date(expense.date), 'MMM d, yyyy')}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{expense.description}</div>
+                      {expense.is_recurring && (
+                        <div className="text-xs text-gray-500">
+                          Recurring ({expense.recurring_interval})
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100">
+                        {EXPENSE_CATEGORIES.find(cat => cat.value === expense.category)?.label}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        {expense.vendor?.name || '-'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        ${expense.amount.toFixed(2)}
+                      </div>
+                      {expense.is_tax_deductible && (
+                        <div className="text-xs text-green-600">Tax Deductible</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {expense.receipt_url && (
+                        <a
+                          href={expense.receipt_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          <DocumentIcon className="h-5 w-5" />
+                        </a>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <button
+                        onClick={() => handleEdit(expense)}
                         className="text-indigo-600 hover:text-indigo-900"
                       >
-                        <DocumentIcon className="h-5 w-5" />
-                      </a>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleEdit(expense)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(expense.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                        <PencilIcon className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(expense.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {isModalOpen && (
@@ -512,6 +562,6 @@ export default function ExpenseList() {
           </div>
         </div>
       )}
-    </div>
+    </Container>
   );
-} 
+}

@@ -1,7 +1,5 @@
-import {useEffect, ReactNode } from 'react';
+import { useEffect, ReactNode, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-// import { supabase } from './lib/supabase';
-// import apiClient from './lib/api';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -23,8 +21,15 @@ import {
   CalculatorIcon,
   DocumentTextIcon,
   ArrowRightOnRectangleIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { supabase } from './lib/supabase';
+import Dashboard from './pages/Dashboard';
+
+interface LayoutProps {
+  children: ReactNode;
+}
 
 // Protected Route wrapper component
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -41,7 +46,8 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function Sidebar() {
+// Sidebar component
+function Sidebar({ onCloseMobile }: { onCloseMobile: () => void }) {
   const location = useLocation();
   const { user } = useAuth();
   const isActive = (path: string) => location.pathname === path;
@@ -55,9 +61,28 @@ function Sidebar() {
   };
 
   return (
-    <nav className="bg-gray-800 text-white w-64 min-h-screen p-4 flex flex-col">
-      <div className="text-xl font-bold mb-8">Freelance Manager</div>
-      <ul className="space-y-2 flex-grow">
+    <nav className="bg-gray-800 text-white w-64 min-h-screen p-4 flex flex-col relative">
+      {/* Mobile close button */}
+      <button
+        onClick={onCloseMobile}
+        className="absolute top-4 right-4 lg:hidden text-gray-300 hover:text-white"
+      >
+        <XMarkIcon className="h-6 w-6" />
+      </button>
+
+      <div className="text-xl font-bold mb-8 lg:block hidden">Freelance Manager</div>
+      
+      <ul className="space-y-2 flex-grow mt-8 lg:mt-0">
+        <li>
+          <Link
+            to="/"
+            className={`block px-4 py-2 rounded ${
+              isActive('/') ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Dashboard
+          </Link>
+        </li>
         <li>
           <Link
             to="/clients"
@@ -164,9 +189,8 @@ function Sidebar() {
         </li>
       </ul>
       
-      {/* User section with sign out button */}
       <div className="border-t border-gray-700 pt-4 mt-4">
-        <div className="px-4 py-2 text-sm text-gray-400">
+        <div className="px-4 py-2 text-sm text-gray-400 truncate">
           {user?.email}
         </div>
         <button
@@ -181,83 +205,61 @@ function Sidebar() {
   );
 }
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
+// Layout component
 function Layout({ children }: LayoutProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
-      <main className="flex-1">{children}</main>
+      {/* Mobile sidebar backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile header */}
+      <div className="fixed top-0 left-0 right-0 bg-gray-800 h-16 flex items-center px-4 lg:hidden z-30">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-white hover:text-gray-300"
+        >
+          <Bars3Icon className="h-6 w-6" />
+        </button>
+        <div className="text-white text-lg font-bold ml-4">Freelance Manager</div>
+      </div>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 transform ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 transition-transform duration-300 ease-in-out z-30 lg:static lg:inset-auto`}
+      >
+        <Sidebar onCloseMobile={() => setIsSidebarOpen(false)} />
+      </div>
+
+      {/* Main content wrapper */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Content area */}
+        <main className="flex-1 relative z-0 overflow-y-auto focus:outline-none">
+          {/* Content container */}
+          <div className="w-full max-w-[2000px] mx-auto">
+            {/* Responsive padding container */}
+            <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6">
+              {/* Page content */}
+              <div className="bg-white shadow-sm rounded-lg">
+                <div className="p-4 sm:p-6 lg:p-8">
+                  {children}
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
-
-// Simple placeholder components
-// const Dashboard = () => {
-//   const [testMessage, setTestMessage] = useState<string>('');
-  
-//   useEffect(() => {
-//     apiClient.get('/test')
-//       .then(response => {
-//         setTestMessage(response.data.message);
-//       })
-//       .catch(error => {
-//         console.error('API Error:', error);
-//         setTestMessage('Failed to connect to API');
-//       });
-//   }, []);
-
-//   return (
-//     <div className="p-6">
-//       <h1 className="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
-//       <p className="text-sm text-gray-600 mb-8">API Status: {testMessage || 'Loading...'}</p>
-//       <div>
-//         <h2 className="text-xl font-semibold text-gray-700 mb-4">Quick Stats</h2>
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-//           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-//             <h3 className="text-gray-600 text-sm font-medium mb-2">Total Income</h3>
-//             <p className="text-2xl font-bold text-green-600">$0.00</p>
-//           </div>
-//           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-//             <h3 className="text-gray-600 text-sm font-medium mb-2">Total Expenses</h3>
-//             <p className="text-2xl font-bold text-red-600">$0.00</p>
-//           </div>
-//           <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-//             <h3 className="text-gray-600 text-sm font-medium mb-2">Net Profit</h3>
-//             <p className="text-2xl font-bold text-blue-600">$0.00</p>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// const Income = () => (
-//   <div className="p-6">
-//     <h1 className="text-2xl font-bold text-gray-800 mb-6">Income</h1>
-//     <p className="text-gray-600">Your income will appear here.</p>
-//   </div>
-// );
-
-// const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
-//   const location = useLocation();
-//   const isActive = location.pathname === to;
-  
-//   return (
-//     <Link
-//       to={to}
-//       className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-//         isActive
-//           ? 'bg-indigo-100 text-indigo-700'
-//           : 'text-gray-600 hover:bg-gray-100'
-//       }`}
-//     >
-//       {children}
-//     </Link>
-//   );
-// };
 
 const App = () => {
   useEffect(() => {
@@ -270,6 +272,17 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route
+            path="/"
+            element={
+             <ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
+            </ProtectedRoute>
+          }
+        />
+
           <Route
             path="/"
             element={

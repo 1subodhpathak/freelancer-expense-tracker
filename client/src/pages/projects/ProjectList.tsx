@@ -3,11 +3,20 @@ import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Project, Client } from '../../types';
 import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+// import Container from '../Container';
 
 const STATUS_COLORS = {
   'proposal': 'bg-yellow-100 text-yellow-800',
   'in-progress': 'bg-blue-100 text-blue-800',
   'completed': 'bg-green-100 text-green-800',
+};
+
+export const Container = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      {children}
+    </div>
+  );
 };
 
 export default function ProjectList() {
@@ -146,9 +155,10 @@ export default function ProjectList() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Projects</h1>
+    <Container>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold">Projects</h1>
         <button
           onClick={() => {
             setEditingProject(null);
@@ -162,7 +172,7 @@ export default function ProjectList() {
             });
             setIsModalOpen(true);
           }}
-          className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
           Add Project
@@ -178,87 +188,90 @@ export default function ProjectList() {
       {loading ? (
         <div>Loading...</div>
       ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Project Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Client
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Dates
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {projects.map((project) => (
-                <tr key={project.id}>
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{project.name}</div>
-                    {project.description && (
-                      <div className="text-sm text-gray-500">{project.description}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{project.client?.name}</div>
-                    {project.client?.company && (
-                      <div className="text-sm text-gray-500">{project.client.company}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={project.status}
-                      onChange={(e) => handleStatusChange(project, e.target.value as Project['status'])}
-                      className={`text-sm rounded-full px-3 py-1 font-medium ${STATUS_COLORS[project.status]}`}
-                    >
-                      <option value="proposal">Proposal</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-500">
-                      {project.start_date && (
-                        <div>Start: {new Date(project.start_date).toLocaleDateString()}</div>
-                      )}
-                      {project.end_date && (
-                        <div>End: {new Date(project.end_date).toLocaleDateString()}</div>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(project)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(project.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </td>
+        <div className="overflow-x-auto -mx-4 sm:mx-0 bg-white shadow rounded-lg">
+          <div className="inline-block min-w-full align-middle">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Project Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Client
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Dates
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {projects.map((project) => (
+                  <tr key={project.id}>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-gray-900">{project.name}</div>
+                      {project.description && (
+                        <div className="text-sm text-gray-500">{project.description}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">{project.client?.name}</div>
+                      {project.client?.company && (
+                        <div className="text-sm text-gray-500">{project.client.company}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={project.status}
+                        onChange={(e) => handleStatusChange(project, e.target.value as Project['status'])}
+                        className={`text-sm rounded-full px-3 py-1 font-medium ${STATUS_COLORS[project.status]}`}
+                      >
+                        <option value="proposal">Proposal</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-500">
+                        {project.start_date && (
+                          <div>Start: {new Date(project.start_date).toLocaleDateString()}</div>
+                        )}
+                        {project.end_date && (
+                          <div>End: {new Date(project.end_date).toLocaleDateString()}</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => handleEdit(project)}
+                        className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      >
+                        <PencilIcon className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(project.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
+      {/* Responsive modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-lg mx-auto p-4 sm:p-6">
             <h2 className="text-xl font-bold mb-4">
               {editingProject ? 'Edit Project' : 'Add New Project'}
             </h2>
@@ -355,6 +368,6 @@ export default function ProjectList() {
           </div>
         </div>
       )}
-    </div>
+    </Container>
   );
-} 
+}
