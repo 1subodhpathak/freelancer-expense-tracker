@@ -25,6 +25,25 @@ interface TaxSettings {
   tax_filing_frequency: 'quarterly' | 'annually';
 }
 
+interface TaxCategory {
+  is_deductible: boolean;
+}
+
+interface ExpenseTaxCategory {
+  amount: number;
+  tax_categories: TaxCategory[];
+  expenses: {
+    date: string;
+  }[];
+}
+
+// Type for the raw Supabase response
+// interface RawExpenseTaxCategory {
+//   amount: number;
+//   tax_categories: Array<{ is_deductible: boolean }>;
+//   expenses: Array<{ date: string }>;
+// }
+
 export default function TaxDashboard() {
   const { user } = useAuth();
   const [currentYear] = useState(new Date().getFullYear());
@@ -71,12 +90,15 @@ export default function TaxDashboard() {
 
       if (expenseError) throw expenseError;
 
-      const deductibleExpenses = expenseData
-        ?.filter(item => item.tax_categories?.is_deductible)
+      // Type the expenseData
+      const typedExpenseData = expenseData as ExpenseTaxCategory[];
+
+      const deductibleExpenses = typedExpenseData
+        ?.filter(item => item.tax_categories.some(category => category.is_deductible))
         .reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
 
-      const nonDeductibleExpenses = expenseData
-        ?.filter(item => !item.tax_categories?.is_deductible)
+      const nonDeductibleExpenses = typedExpenseData
+        ?.filter(item => item.tax_categories.every(category => !category.is_deductible))
         .reduce((sum, item) => sum + (item.amount || 0), 0) || 0;
 
       const estimatedTaxLiability = (totalIncome - deductibleExpenses) * (taxSettings?.estimated_tax_rate || 0.3);
@@ -215,4 +237,4 @@ export default function TaxDashboard() {
       </div>
     </div>
   );
-} 
+}

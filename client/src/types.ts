@@ -82,15 +82,53 @@ export interface Invoice {
   project?: Project;
 }
 
+export type ExpenseCategory = 
+  | 'office_supplies'
+  | 'software'
+  | 'travel'
+  | 'meals'
+  | 'utilities'
+  | 'rent'
+  | 'insurance'
+  | 'marketing'
+  | 'professional_services'
+  | 'equipment'
+  | 'maintenance'
+  | 'other';
+
+export type RecurringInterval = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+export interface Vendor {
+  id: string;
+  user_id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  website?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Expense {
   id: string;
   user_id: string;
-  category: string;
+  vendor_id?: string;
+  category: ExpenseCategory;
   amount: number;
-  description: string;
   date: string;
+  description: string;
   receipt_url?: string;
+  is_recurring: boolean;
+  recurring_interval?: RecurringInterval;
+  next_expense_date?: string;
+  is_tax_deductible: boolean;
+  tax_category?: string;
+  notes?: string;
   created_at: string;
+  updated_at: string;
+  vendor?: Vendor;
 }
 
 export interface TimeEntry {

@@ -48,7 +48,6 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function TimeTrackingAnalytics() {
   const { user } = useAuth();
-  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
   const [projectStats, setProjectStats] = useState<ProjectStats[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +56,29 @@ export default function TimeTrackingAnalytics() {
     start: format(startOfWeek(new Date()), 'yyyy-MM-dd'),
     end: format(endOfWeek(new Date()), 'yyyy-MM-dd'),
   });
+
+  const DateRangeSelector = () => (
+    <div className="mb-6 flex gap-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Start Date</label>
+        <input
+          type="date"
+          value={dateRange.start}
+          onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">End Date</label>
+        <input
+          type="date"
+          value={dateRange.end}
+          onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        />
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     if (user) {
@@ -78,7 +100,6 @@ export default function TimeTrackingAnalytics() {
         .order('start_time');
 
       if (error) throw error;
-      setTimeEntries(data || []);
       calculateStats(data || []);
     } catch (err) {
       console.error('Error fetching time entries:', err);
@@ -159,6 +180,7 @@ export default function TimeTrackingAnalytics() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Time Tracking Analytics</h1>
+      <DateRangeSelector />
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -198,7 +220,7 @@ export default function TimeTrackingAnalytics() {
                   outerRadius={80}
                   label={({ name, value }) => `${name}: ${formatDuration(value)}`}
                 >
-                  {projectStats.map((entry, index) => (
+                  {projectStats.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -247,4 +269,4 @@ export default function TimeTrackingAnalytics() {
       </div>
     </div>
   );
-} 
+}

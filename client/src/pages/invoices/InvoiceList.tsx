@@ -11,7 +11,8 @@ const STATUS_COLORS = {
   'sent': 'bg-blue-100 text-blue-800',
   'paid': 'bg-green-100 text-green-800',
   'overdue': 'bg-red-100 text-red-800',
-};
+  'cancelled': 'bg-gray-300 text-gray-800',
+} as const;
 
 export default function InvoiceList() {
   const { user } = useAuth();
@@ -153,8 +154,8 @@ export default function InvoiceList() {
   const handleEdit = (invoice: Invoice) => {
     setEditingInvoice(invoice);
     setFormData({
-      project_id: invoice.project_id,
-      client_id: invoice.client_id,
+      project_id: invoice.project_id || '',
+      client_id: invoice.client_id || '',
       invoice_number: invoice.invoice_number,
       status: invoice.status,
       issue_date: invoice.issue_date,
@@ -296,6 +297,7 @@ export default function InvoiceList() {
               <option value="sent">Sent</option>
               <option value="paid">Paid</option>
               <option value="overdue">Overdue</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
           <div className="flex items-center space-x-2">
@@ -580,6 +582,7 @@ export default function InvoiceList() {
                   <option value="sent">Sent</option>
                   <option value="paid">Paid</option>
                   <option value="overdue">Overdue</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
               </div>
 
