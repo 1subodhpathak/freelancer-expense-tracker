@@ -281,16 +281,19 @@ export default function InvoiceList() {
   }, [invoices]);
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 sm:p-6 lg:p-8">
+      {/* Responsive Header */}
+      <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Invoices</h1>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
+        
+        {/* Responsive Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
             <label className="text-sm text-gray-600">Filter:</label>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value as Invoice['status'] | 'all')}
-              className="rounded-md border-gray-300 text-sm"
+              className="rounded-md border-gray-300 text-sm w-full sm:w-auto"
             >
               <option value="all">All</option>
               <option value="draft">Draft</option>
@@ -300,24 +303,28 @@ export default function InvoiceList() {
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
-          <div className="flex items-center space-x-2">
+          
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
             <label className="text-sm text-gray-600">Sort by:</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'date' | 'amount' | 'due')}
-              className="rounded-md border-gray-300 text-sm"
-            >
-              <option value="date">Issue Date</option>
-              <option value="amount">Amount</option>
-              <option value="due">Due Date</option>
-            </select>
-            <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="p-1 hover:bg-gray-100 rounded"
-            >
-              {sortOrder === 'asc' ? '↑' : '↓'}
-            </button>
+            <div className="flex gap-2">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'date' | 'amount' | 'due')}
+                className="rounded-md border-gray-300 text-sm w-full sm:w-auto"
+              >
+                <option value="date">Issue Date</option>
+                <option value="amount">Amount</option>
+                <option value="due">Due Date</option>
+              </select>
+              <button
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                {sortOrder === 'asc' ? '↑' : '↓'}
+              </button>
+            </div>
           </div>
+
           <button
             onClick={() => {
               setEditingInvoice(null);
@@ -336,7 +343,7 @@ export default function InvoiceList() {
               });
               setIsModalOpen(true);
             }}
-            className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+            className="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 w-full sm:w-auto"
           >
             <PlusIcon className="h-5 w-5 mr-2" />
             Create Invoice
@@ -344,144 +351,235 @@ export default function InvoiceList() {
         </div>
       </div>
 
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
 
+      {/* Loading State */}
       {loading ? (
-        <div>Loading...</div>
+        <div className="flex justify-center items-center h-64">Loading...</div>
       ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Invoice Number
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Client
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Project
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due Date
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredInvoices.map((invoice) => (
-                <tr key={invoice.id} className={invoice.status === 'overdue' ? 'bg-red-50' : ''}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{invoice.invoice_number}</div>
-                    {invoice.is_recurring && (
-                      <span className="text-xs text-indigo-600">Recurring</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{invoice.client?.name}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{invoice.project?.name}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      ${invoice.amount.toFixed(2)}
-                      {invoice.paid_amount > 0 && (
-                        <span className="text-xs text-gray-500 ml-1">
-                          (Paid: ${invoice.paid_amount.toFixed(2)})
-                        </span>
-                      )}
+        <>
+          {/* Mobile View */}
+          <div className="block sm:hidden space-y-4">
+            {filteredInvoices.map((invoice) => (
+              <div 
+                key={invoice.id} 
+                className={`bg-white rounded-lg shadow-sm p-4 ${
+                  invoice.status === 'overdue' ? 'border-l-4 border-red-500' : ''
+                }`}
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="font-medium">{invoice.invoice_number}</div>
+                    <div className="text-sm text-gray-500">{invoice.client?.name}</div>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${STATUS_COLORS[invoice.status]}`}>
+                    {invoice.status}
+                  </span>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Amount:</span>
+                    <span className="font-medium">${invoice.amount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Due Date:</span>
+                    <span>{format(parseISO(invoice.due_date), 'MMM dd, yyyy')}</span>
+                  </div>
+                  {invoice.paid_amount > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-500">Paid:</span>
+                      <span className="text-green-600">${invoice.paid_amount.toFixed(2)}</span>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span 
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_COLORS[invoice.status]} cursor-pointer`}
-                      onClick={() => {
-                        const newStatus = invoice.status === 'draft' ? 'sent' 
-                          : invoice.status === 'sent' ? 'paid'
-                          : invoice.status === 'paid' ? 'sent'
-                          : 'sent';
-                        handleStatusChange(invoice, newStatus);
-                      }}
-                      title="Click to change status"
-                    >
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{format(parseISO(invoice.due_date), 'MMM dd, yyyy')}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                    {invoice.status !== 'paid' && (
-                      <>
-                        <button
-                          onClick={() => handleQuickPay(invoice)}
-                          className="text-green-600 hover:text-green-900"
-                          title="Mark as Paid"
-                        >
-                          <CreditCardIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            const amount = prompt('Enter payment amount:', invoice.amount.toString());
-                            if (amount !== null) {
-                              const parsedAmount = parseFloat(amount);
-                              if (!isNaN(parsedAmount) && parsedAmount >= 0) {
-                                handlePaymentUpdate(invoice, parsedAmount);
-                              }
+                  )}
+                </div>
+
+                <div className="mt-4 flex justify-end gap-2">
+                  {/* Action buttons */}
+                  {invoice.status !== 'paid' && (
+                    <>
+                      <button
+                        onClick={() => handleQuickPay(invoice)}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded"
+                      >
+                        <CreditCardIcon className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const amount = prompt('Enter payment amount:', invoice.amount.toString());
+                          if (amount !== null) {
+                            const parsedAmount = parseFloat(amount);
+                            if (!isNaN(parsedAmount) && parsedAmount >= 0) {
+                              handlePaymentUpdate(invoice, parsedAmount);
                             }
-                          }}
-                          className="text-blue-600 hover:text-blue-900"
-                          title="Update Payment"
-                        >
-                          $
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => handleEdit(invoice)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                      title="Edit Invoice"
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <Link
-                      to={`/invoices/${invoice.id}/view`}
-                      className="text-gray-600 hover:text-gray-900"
-                      title="View Invoice"
-                    >
-                      <DocumentIcon className="h-5 w-5" />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(invoice.id)}
-                      className="text-red-600 hover:text-red-900"
-                      title="Delete Invoice"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </td>
+                          }
+                        }}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                      >
+                        $
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => handleEdit(invoice)}
+                    className="p-2 text-indigo-600 hover:bg-indigo-50 rounded"
+                  >
+                    <PencilIcon className="h-5 w-5" />
+                  </button>
+                  <Link
+                    to={`/invoices/${invoice.id}/view`}
+                    className="p-2 text-gray-600 hover:bg-gray-50 rounded"
+                  >
+                    <DocumentIcon className="h-5 w-5" />
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(invoice.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop View */}
+          <div className="hidden sm:block overflow-x-auto bg-white shadow rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Invoice Number
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Client
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Project
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Due Date
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredInvoices.map((invoice) => (
+                  <tr key={invoice.id} className={invoice.status === 'overdue' ? 'bg-red-50' : ''}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{invoice.invoice_number}</div>
+                      {invoice.is_recurring && (
+                        <span className="text-xs text-indigo-600">Recurring</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{invoice.client?.name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{invoice.project?.name}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        ${invoice.amount.toFixed(2)}
+                        {invoice.paid_amount > 0 && (
+                          <span className="text-xs text-gray-500 ml-1">
+                            (Paid: ${invoice.paid_amount.toFixed(2)})
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span 
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${STATUS_COLORS[invoice.status]} cursor-pointer`}
+                        onClick={() => {
+                          const newStatus = invoice.status === 'draft' ? 'sent' 
+                            : invoice.status === 'sent' ? 'paid'
+                            : invoice.status === 'paid' ? 'sent'
+                            : 'sent';
+                          handleStatusChange(invoice, newStatus);
+                        }}
+                        title="Click to change status"
+                      >
+                        {invoice.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{format(parseISO(invoice.due_date), 'MMM dd, yyyy')}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      {invoice.status !== 'paid' && (
+                        <>
+                          <button
+                            onClick={() => handleQuickPay(invoice)}
+                            className="text-green-600 hover:text-green-900"
+                            title="Mark as Paid"
+                          >
+                            <CreditCardIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              const amount = prompt('Enter payment amount:', invoice.amount.toString());
+                              if (amount !== null) {
+                                const parsedAmount = parseFloat(amount);
+                                if (!isNaN(parsedAmount) && parsedAmount >= 0) {
+                                  handlePaymentUpdate(invoice, parsedAmount);
+                                }
+                              }
+                            }}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Update Payment"
+                          >
+                            $
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => handleEdit(invoice)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                        title="Edit Invoice"
+                      >
+                        <PencilIcon className="h-5 w-5" />
+                      </button>
+                      <Link
+                        to={`/invoices/${invoice.id}/view`}
+                        className="text-gray-600 hover:text-gray-900"
+                        title="View Invoice"
+                      >
+                        <DocumentIcon className="h-5 w-5" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(invoice.id)}
+                        className="text-red-600 hover:text-red-900"
+                        title="Delete Invoice"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
+      {/* Responsive Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-8 max-w-2xl w-full">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">
               {editingInvoice ? 'Edit Invoice' : 'Create New Invoice'}
             </h2>
@@ -649,4 +747,4 @@ export default function InvoiceList() {
       )}
     </div>
   );
-} 
+}
