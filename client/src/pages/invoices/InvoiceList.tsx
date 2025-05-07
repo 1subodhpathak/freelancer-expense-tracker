@@ -276,6 +276,17 @@ export default function InvoiceList() {
     });
   };
 
+  const handleIssueDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newIssueDate = e.target.value;
+    setFormData(prev => {
+      // If due date exists and is before new issue date, clear it
+      if (prev.due_date && prev.due_date < newIssueDate) {
+        return { ...prev, issue_date: newIssueDate, due_date: '' };
+      }
+      return { ...prev, issue_date: newIssueDate };
+    });
+  };
+
   useEffect(() => {
     checkOverdueInvoices();
   }, [invoices]);
@@ -626,7 +637,7 @@ export default function InvoiceList() {
                     type="date"
                     required
                     value={formData.issue_date}
-                    onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
+                    onChange={handleIssueDateChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 </div>
@@ -635,10 +646,17 @@ export default function InvoiceList() {
                   <input
                     type="date"
                     required
+                    min={formData.issue_date || undefined}
                     value={formData.due_date}
                     onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    disabled={!formData.issue_date}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
+                  {!formData.issue_date && (
+                    <p className="mt-1 text-sm text-gray-500">
+                      Please select an issue date first
+                    </p>
+                  )}
                 </div>
               </div>
 

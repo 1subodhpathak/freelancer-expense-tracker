@@ -154,6 +154,16 @@ export default function ProjectList() {
     }
   };
 
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStartDate = e.target.value;
+    setFormData(prev => {
+      if (prev.end_date && prev.end_date < newStartDate) {
+        return { ...prev, start_date: newStartDate, end_date: '' };
+      }
+      return { ...prev, start_date: newStartDate };
+    });
+  };
+
   return (
     <Container>
       {/* Header */}
@@ -334,7 +344,8 @@ export default function ProjectList() {
                   <input
                     type="date"
                     value={formData.start_date}
-                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    onChange={handleStartDateChange}
+                    max="2030-12-31"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                   />
                 </div>
@@ -343,9 +354,14 @@ export default function ProjectList() {
                   <input
                     type="date"
                     value={formData.end_date}
+                    min={formData.start_date || undefined}
                     onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    disabled={!formData.start_date}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                   />
+                  {!formData.start_date && (
+                    <p className="text-sm text-gray-500 mt-1">Please select a start date first</p>
+                  )}
                 </div>
               </div>
 

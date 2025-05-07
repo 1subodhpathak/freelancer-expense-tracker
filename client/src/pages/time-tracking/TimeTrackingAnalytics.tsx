@@ -57,14 +57,26 @@ export default function TimeTrackingAnalytics() {
     end: format(endOfWeek(new Date()), 'yyyy-MM-dd'),
   });
 
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newStartDate = e.target.value;
+    setDateRange(prev => {
+      // If end date exists and is before new start date, clear it
+      if (prev.end && prev.end < newStartDate) {
+        return { ...prev, start: newStartDate, end: '' };
+      }
+      return { ...prev, start: newStartDate };
+    });
+  };
+
   const DateRangeSelector = () => (
     <div className="mb-6 flex gap-4">
       <div>
         <label className="block text-sm font-medium text-gray-700">Start Date</label>
         <input
           type="date"
+          required
           value={dateRange.start}
-          onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+          onChange={handleStartDateChange}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
         />
       </div>
@@ -72,10 +84,18 @@ export default function TimeTrackingAnalytics() {
         <label className="block text-sm font-medium text-gray-700">End Date</label>
         <input
           type="date"
+          required
+          min={dateRange.start || undefined}
           value={dateRange.end}
           onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          disabled={!dateRange.start}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
         />
+        {!dateRange.start && (
+          <p className="mt-1 text-sm text-gray-500">
+            Please select a start date first
+          </p>
+        )}
       </div>
     </div>
   );
