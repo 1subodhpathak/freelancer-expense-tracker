@@ -26,6 +26,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { supabase } from './lib/supabase';
 import Dashboard from './pages/Dashboard';
+import VendorList from './pages/vendors/VendorList';
 
 interface LayoutProps {
   children: ReactNode;
@@ -121,6 +122,16 @@ function Sidebar({ onCloseMobile }: { onCloseMobile: () => void }) {
             }`}
           >
             Expenses
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/vendors"
+            className={`flex items-center px-4 py-2 rounded ${
+              isActive('/vendors') ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Vendors
           </Link>
         </li>
         <li>
@@ -399,6 +410,16 @@ const App = () => {
               <ProtectedRoute>
                 <Layout>
                   <QuarterlyTaxCalculator />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/vendors"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <VendorList />
                 </Layout>
               </ProtectedRoute>
             }

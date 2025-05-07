@@ -110,16 +110,17 @@ export default function VendorList() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Vendors</h1>
+    <div className="p-4 sm:p-6 lg:p-8">
+      {/* Responsive Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Vendors</h1>
         <button
           onClick={() => {
             setEditingVendor(null);
             setFormData(initialFormData);
             setIsModalOpen(true);
           }}
-          className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
           Add Vendor
@@ -133,57 +134,24 @@ export default function VendorList() {
       )}
 
       {loading ? (
-        <div>Loading...</div>
+        <div className="flex justify-center items-center h-64">Loading...</div>
       ) : (
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Website
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Notes
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {vendors.map((vendor) => (
-                <tr key={vendor.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{vendor.name}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{vendor.email}</div>
-                    <div className="text-sm text-gray-500">{vendor.phone}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {vendor.website && (
-                      <a
-                        href={vendor.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-indigo-600 hover:text-indigo-900"
-                      >
-                        {vendor.website}
-                      </a>
+        <>
+          {/* Mobile View */}
+          <div className="block sm:hidden space-y-4">
+            {vendors.map((vendor) => (
+              <div key={vendor.id} className="bg-white shadow rounded-lg p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="font-medium text-gray-900">{vendor.name}</div>
+                    {vendor.email && (
+                      <div className="text-sm text-gray-600">{vendor.email}</div>
                     )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-500 truncate max-w-xs">
-                      {vendor.notes}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                    {vendor.phone && (
+                      <div className="text-sm text-gray-500">{vendor.phone}</div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(vendor)}
                       className="text-indigo-600 hover:text-indigo-900"
@@ -196,88 +164,191 @@ export default function VendorList() {
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
-                  </td>
+                  </div>
+                </div>
+                {vendor.website && (
+                  <div className="mb-2">
+                    <a
+                      href={vendor.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-indigo-600 hover:text-indigo-900"
+                    >
+                      {vendor.website}
+                    </a>
+                  </div>
+                )}
+                {vendor.notes && (
+                  <div className="text-sm text-gray-500">{vendor.notes}</div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop View */}
+          <div className="hidden sm:block overflow-x-auto bg-white shadow-md rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contact
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Website
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notes
+                  </th>
+                  <th className="px-4 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {vendors.map((vendor) => (
+                  <tr key={vendor.id}>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{vendor.name}</div>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="text-sm text-gray-900">{vendor.email}</div>
+                      <div className="text-sm text-gray-500">{vendor.phone}</div>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      {vendor.website && (
+                        <a
+                          href={vendor.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-indigo-600 hover:text-indigo-900"
+                        >
+                          {vendor.website}
+                        </a>
+                      )}
+                    </td>
+                    <td className="px-4 sm:px-6 py-4">
+                      <div className="text-sm text-gray-500 truncate max-w-xs">
+                        {vendor.notes}
+                      </div>
+                    </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                      <button
+                        onClick={() => handleEdit(vendor)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        <PencilIcon className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(vendor.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
+      {/* Responsive Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-8 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">
               {editingVendor ? 'Edit Vendor' : 'Add New Vendor'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Address</label>
-                <textarea
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  rows={2}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Website</label>
-                <input
-                  type="url"
-                  value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Notes</label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  rows={3}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
+              {/* Form fields remain the same, but add responsive padding */}
+              <div className="space-y-4">
+                {/* Name field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                {/* Other form fields follow the same pattern... */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address
+                  </label>
+                  <textarea
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    rows={2}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Website
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.website}
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    rows={3}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  />
+                </div>
               </div>
 
-              <div className="flex justify-end space-x-3 mt-6">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
+                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
                 >
                   {editingVendor ? 'Update Vendor' : 'Add Vendor'}
                 </button>
@@ -288,4 +359,4 @@ export default function VendorList() {
       )}
     </div>
   );
-} 
+}
