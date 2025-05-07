@@ -324,7 +324,7 @@ const App = () => {
             }
           />
           <Route
-            path="/invoices/:id"
+            path="/invoices/:id/view"
             element={
               <ProtectedRoute>
                 <Layout>
